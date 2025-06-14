@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor Following Arrow Grid</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #AAAAAA;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            cursor: none;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            gap: 2px;
+            padding: 20px;
+        }
+
+        .arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease-out;
+            position: relative;
+            width: 30px;
+            height: 30px;
+        }
+
+        .arrow svg {
+            width: 20px;
+            height: 20px;
+            transition: all 0.1s ease-out;
+        }
+
+        .arrow:hover svg {
+            transform: scale(1.2);
+        }
+
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff6b6b, #ee5a52);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
+            transition: transform 0.1s ease-out;
+        }
+
+        .cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 14px;
+            z-index: 999;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: repeat(15, 1fr);
+                grid-template-rows: repeat(20, 1fr);
+                padding: 10px;
+            }
+            
+            .arrow svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                grid-template-columns: repeat(12, 1fr);
+                grid-template-rows: repeat(25, 1fr);
+            }
+            
+            .arrow svg {
+                width: 12px;
+                height: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <div>Move your cursor to control the arrows</div>
+        <div id="coords">X: 0, Y: 0</div>
+    </div>
+    
+    <div class="container" id="arrowGrid"></div>
+    <div class="cursor" id="customCursor"></div>
+
+    <script>
+        class CursorArrowGrid {
+            constructor() {
+                this.container = document.getElementById('arrowGrid');
+                this.cursor = document.getElementById('customCursor');
+                this.coords = document.getElementById('coords');
+                this.arrows = [];
+                this.mouseX = 0;
+                this.mouseY = 0;
+                
+                this.init();
+                this.bindEvents();
+                this.animate();
+            }
+
+            init() {
+                // Calculate grid dimensions based on screen size
+                const isMobile = window.innerWidth <= 768;
+                const isSmallMobile = window.innerWidth <= 480;
+                
+                let cols, rows;
+                if (isSmallMobile) {
+                    cols = 12;
+                    rows = 25;
+                } else if (isMobile) {
+                    cols = 15;
+                    rows = 20;
+                } else {
+                    cols = 20;
+                    rows = 15;
+                }
+
+                // Create arrows with SVG
+                for (let i = 0; i < cols * rows; i++) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'arrow';
+                    arrow.dataset.index = i;
+                    
+                    // Create SVG element
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('width', '77');
+                    svg.setAttribute('height', '77');
+                    svg.setAttribute('viewBox', '0 0 77 77');
+                    svg.setAttribute('fill', 'none');
+                    
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', 'M27.0413 53.4395L29.048 38.835L40.6925 47.8752L27.0413 53.4395ZM34.0874 44.3635L33.0789 43.5806L48.998 23.0756L50.0064 23.8585L51.0148 24.6414L35.0958 45.1464L34.0874 44.3635Z');
+                    path.setAttribute('fill', '#222222');
+                    
+                    svg.appendChild(path);
+                    arrow.appendChild(svg);
+                    
+                    this.container.appendChild(arrow);
+                    this.arrows.push(arrow);
+                }
+            }
+
+            bindEvents() {
+                document.addEventListener('mousemove', (e) => {
+                    this.mouseX = e.clientX;
+                    this.mouseY = e.clientY;
+                    
+                    // Update custom cursor position
+                    this.cursor.style.left = this.mouseX + 'px';
+                    this.cursor.style.top = this.mouseY + 'px';
+                    
+                    // Update coordinates display
+                    this.coords.textContent = `X: ${Math.round(this.mouseX)}, Y: ${Math.round(this.mouseY)}`;
+                });
+
+                document.addEventListener('mouseenter', () => {
+                    this.cursor.style.opacity = '1';
+                });
+
+                document.addEventListener('mouseleave', () => {
+                    this.cursor.style.opacity = '0';
+                });
+
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    this.container.innerHTML = '';
+                    this.arrows = [];
+                    this.init();
+                });
+            }
+
+            calculateAngle(arrowElement) {
+                const rect = arrowElement.getBoundingClientRect();
+                const arrowCenterX = rect.left + rect.width / 2;
+                const arrowCenterY = rect.top + rect.height / 2;
+                
+                const deltaX = this.mouseX - arrowCenterX;
+                const deltaY = this.mouseY - arrowCenterY;
+                
+                // Calculate angle in radians, then convert to degrees
+                const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+                
+                // Adjust for SVG arrow orientation (pointing upward by default)
+                return angle + 90;
+            }
+
+            updateArrows() {
+                this.arrows.forEach(arrow => {
+                    const angle = this.calculateAngle(arrow);
+                    const distance = this.getDistanceFromCursor(arrow);
+                    
+                    // Apply rotation
+                    arrow.style.transform = `rotate(${angle}deg)`;
+                    
+                    // Add subtle scaling based on distance
+                    const maxDistance = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
+                    const normalizedDistance = Math.min(distance / maxDistance, 1);
+                    const scale = 0.8 + (0.4 * (1 - normalizedDistance));
+                    
+                    arrow.style.transform += ` scale(${scale})`;
+                    
+                    // Add opacity effect
+                    const opacity = 0.6 + (0.4 * (1 - normalizedDistance));
+                    arrow.style.opacity = opacity;
+                });
+            }
+
+            getDistanceFromCursor(element) {
+                const rect = element.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const deltaX = this.mouseX - centerX;
+                const deltaY = this.mouseY - centerY;
+                
+                return Math.sqrt(deltaX ** 2 + deltaY ** 2);
+            }
+
+            animate() {
+                this.updateArrows();
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new CursorArrowGrid();
+        });
+
+        // Add some interactive easter eggs
+        document.addEventListener('click', (e) => {
+            // Create ripple effect on click
+            const ripple = document.createElement('div');
+            ripple.style.position = 'fixed';
+            ripple.style.left = e.clientX + 'px';
+            ripple.style.top = e.clientY + 'px';
+            ripple.style.width = '0px';
+            ripple.style.height = '0px';
+            ripple.style.background = 'radial-gradient(circle, rgba(255,255,255,0.6), transparent)';
+            ripple.style.borderRadius = '50%';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.pointerEvents = 'none';
+            ripple.style.zIndex = '999';
+            ripple.style.animation = 'ripple 0.6s ease-out';
+            
+            document.body.appendChild(ripple);
+            
+            setTimeout(() => {
+                document.body.removeChild(ripple);
+            }, 600);
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                0% {
+                    width: 0px;
+                    height: 0px;
+                    opacity: 1;
+                }
+                100% {
+                    width: 200px;
+                    height: 200px;
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
