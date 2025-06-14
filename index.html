@@ -128,6 +128,7 @@
     <div class="info">
         <div>Move your cursor to control the arrows</div>
         <div id="coords">X: 0, Y: 0</div>
+        <div id="calibration">Angle Offset: -45° (Use ↑↓ arrow keys to adjust)</div>
     </div>
     
     <div class="container" id="arrowGrid"></div>
@@ -139,13 +140,16 @@
                 this.container = document.getElementById('arrowGrid');
                 this.cursor = document.getElementById('customCursor');
                 this.coords = document.getElementById('coords');
+                this.calibrationElement = document.getElementById('calibration');
                 this.arrows = [];
                 this.mouseX = 0;
                 this.mouseY = 0;
+                this.angleOffset = -45; // Start with -45, adjustable with arrow keys
                 
                 this.init();
                 this.bindEvents();
                 this.animate();
+                this.showCalibrationInfo();
             }
 
             init() {
@@ -211,6 +215,19 @@
                     this.cursor.style.opacity = '0';
                 });
 
+                // Calibration controls
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowUp') {
+                        this.angleOffset += 5;
+                        this.updateCalibrationDisplay();
+                        e.preventDefault();
+                    } else if (e.key === 'ArrowDown') {
+                        this.angleOffset -= 5;
+                        this.updateCalibrationDisplay();
+                        e.preventDefault();
+                    }
+                });
+
                 // Handle window resize
                 window.addEventListener('resize', () => {
                     this.container.innerHTML = '';
@@ -230,8 +247,19 @@
                 // Calculate angle in radians, then convert to degrees
                 const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
                 
-                // Adjust for SVG arrow orientation - experimenting with different offset
-                return angle + 135;
+                // Use adjustable offset to calibrate pointing direction
+                return angle + this.angleOffset;
+            }
+
+            showCalibrationInfo() {
+                this.calibrationElement = document.getElementById('calibration');
+                this.updateCalibrationDisplay();
+            }
+
+            updateCalibrationDisplay() {
+                if (this.calibrationElement) {
+                    this.calibrationElement.textContent = `Angle Offset: ${this.angleOffset}° (Use ↑↓ arrow keys to adjust)`;
+                }
             }
 
             updateArrows() {
