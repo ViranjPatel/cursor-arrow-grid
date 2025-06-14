@@ -1,0 +1,31 @@
+{
+  "name": "cursor-arrow-grid",
+  "version": "1.0.0",
+  "description": "Interactive arrow grid that follows your cursor",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "build": "echo 'No build required for static site'",
+    "deploy": "gh-pages -d ."
+  },
+  "keywords": [
+    "cursor",
+    "arrows",
+    "interactive",
+    "grid",
+    "animation",
+    "javascript",
+    "css"
+  ],
+  "author": "Viranj Patel",
+  "license": "MIT",
+  "devDependencies": {
+    "gh-pages": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ViranjPatel/cursor-arrow-grid.git"
+  },
+  "homepage": "https://viranjpatel.github.io/cursor-arrow-grid"
+}
