@@ -39,8 +39,8 @@
         }
 
         .arrow svg {
-            width: 20px;
-            height: 20px;
+            width: 32px;
+            height: 32px;
             transition: all 0.1s ease-out;
         }
 
@@ -106,8 +106,8 @@
             }
             
             .arrow svg {
-                width: 16px;
-                height: 16px;
+                width: 24px;
+                height: 24px;
             }
         }
 
@@ -118,8 +118,8 @@
             }
             
             .arrow svg {
-                width: 12px;
-                height: 12px;
+                width: 20px;
+                height: 20px;
             }
         }
     </style>
@@ -230,8 +230,8 @@
                 // Calculate angle in radians, then convert to degrees
                 const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
                 
-                // Adjust for SVG arrow orientation (pointing upward by default)
-                return angle + 90;
+                // Adjust for SVG arrow orientation - experimenting with different offset
+                return angle + 135;
             }
 
             updateArrows() {
